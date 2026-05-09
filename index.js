@@ -16,18 +16,18 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
-const run = async ()=>{
-  try{
+const run = async () => {
+  try {
     await client.connect();
+    const db = client.db('simple_crud_db');
+    const userCollection = db.collection('users');
 
-    app.get('/users', async (req, res)=>{
-      const db = client.db('simple_crud_db');
-      const userCollection = db.collection('users');
+    app.get('/users', async (req, res) => {
       const cursor = userCollection.find();
       const result = await cursor.toArray();
       res.send(result);
 
-      app.get('/users/:id', async (req, res)=>{
+      app.get('/users/:id', async (req, res) => {
         const id = req.params.id;
         const query = {
           _id: new ObjectId(id)
@@ -35,31 +35,38 @@ const run = async ()=>{
         const result = await userCollection.findOne(query);
         res.send(result);
       })
+    })
+    app.post('/users', async (req, res) => {
+      const newUser = req.body;
+      console.log(newUser)
+      const result = await userCollection.insertOne(newUser);
+      res.send(result);
+      console.log(result);
+    })
 
-      app.delete('/users/:id', async (req, res)=>{
-        const id = req.params.id;
-        const query = {
-          _id: new ObjectId(id)
-        };
-        const result = await userCollection.deleteOne(query);
-        console.log(result);
-        res.send(result);
-      })
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
+      };
+      const result = await userCollection.deleteOne(query);
+      console.log(result);
+      res.send(result);
     })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   }
-  finally{
+  finally {
     // await client.close();
   }
 }
 run().catch(console.dir);
 
-app.get('/', (req, res)=>{
-    res.send('Hello from Home')
+app.get('/', (req, res) => {
+  res.send('Hello from Home')
 })
 
-app.listen(port, ()=>{
-    console.log(`server is running on port ${port}`)
+app.listen(port, () => {
+  console.log(`server is running on port ${port}`)
 })
