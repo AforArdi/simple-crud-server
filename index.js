@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const cors = require('cors')
@@ -7,7 +9,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 app.use(cors())
 app.use(express.json())
 
-const uri = "mongodb+srv://simple_crud:37OlGbCYE50miKOU@cluster-ardi.8lva6gn.mongodb.net/?appName=Cluster-Ardi";
+const uri = `mongodb+srv://${process.env.MONGO_DB_USERNAME}:${process.env.MONGO_DB_PASS}@cluster-ardi.8lva6gn.mongodb.net/?appName=Cluster-Ardi`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -36,12 +38,22 @@ const run = async () => {
         res.send(result);
       })
     })
+
     app.post('/users', async (req, res) => {
       const newUser = req.body;
       console.log(newUser)
       const result = await userCollection.insertOne(newUser);
       res.send(result);
       console.log(result);
+    })
+
+    app.patch('/users/:id', async (req, res)=>{
+      const id = req.params.id;
+      const doc = {
+        $set: {
+
+        }
+      }
     })
 
     app.delete('/users/:id', async (req, res) => {
